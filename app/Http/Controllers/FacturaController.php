@@ -17,12 +17,90 @@ class FacturaController extends Controller
      */
     public function index()
     {
-       // $facturas = DB::table('factura')->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')->select('factura.*', 'reng_fac.*')->where('factura.fact_num', 1)
-      //  ->get();
+        $facturas_pollo = DB::table('factura')
+        ->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')
+        ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
+        ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
+        ->join('sub_lin', 'lin_art.co_lin', '=', 'sub_lin.co_lin')
+        ->where('lin_art.lin_des', 'CARNICERIA')
+        ->where('sub_lin.subl_des', 'POLLO')
+        ->where('reng_fac.uni_venta', 'KG')
+        ->limit(100)
+   //     ->where('factura.fec_emis', '2023-11-02 00:00:00')
+        ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
+        ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
+        ->orderBy('sub_lin.subl_des')
+        ->get();
+
+        $facturas_carne = DB::table('factura')
+        ->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')
+        ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
+        ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
+        ->join('sub_lin', 'lin_art.co_lin', '=', 'sub_lin.co_lin')
+        ->where('lin_art.lin_des', 'CARNICERIA')
+        ->where('sub_lin.subl_des', 'CARNES')
+        ->where('reng_fac.uni_venta', 'KG')
+        ->limit(500)
+    //    ->where('factura.fec_emis', '2023-11-02 00:00:00')
+        ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
+        ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
+        ->orderBy('sub_lin.subl_des')
+        ->get();
+
+        
+        $facturas_cerdo = DB::table('factura')
+        ->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')
+        ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
+        ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
+        ->join('sub_lin', 'lin_art.co_lin', '=', 'sub_lin.co_lin')
+        ->where('lin_art.lin_des', 'CARNICERIA')
+        ->where('sub_lin.subl_des', 'CERDO')
+        ->where('reng_fac.uni_venta', 'KG')
+        ->limit(1000)
+    //    ->where('factura.fec_emis', '2023-11-02 00:00:00')
+        ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
+        ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
+        ->orderBy('sub_lin.subl_des')
+        ->get();
+        
+      $total_pollo = [];
+      $total_carne = [];
+      $total_cerdo = [];
+
+        foreach($facturas_pollo as $pollo) {
+            if($pollo->kg[0] == '.') {
+                array_push($total_pollo, '0'.$pollo->kg);
+            } else {
+                array_push($total_pollo, $pollo->kg);
+            }
+          
+        } 
+
+        foreach($facturas_carne as $carne) {
+            if($carne->kg[0] == '.') {
+                array_push($total_carne, '0'.$carne->kg);
+            } else {
+                array_push($total_carne, $carne->kg);
+            }
+          
+        } 
+
+        foreach($facturas_cerdo as $cerdo) {
+            if($cerdo->kg[0] == '.') {
+                array_push($total_cerdo, '0'.$cerdo->kg);
+            } else {
+                array_push($total_cerdo, $cerdo->kg);
+            }
+          
+        } 
+       
+       // ->sum('reng_fac.total_art');
        // $cantidad_kg_carne =  DB::select('SELECT * FROM users WHERE id > ?', [$userId]);
         return response()->json([
             'status' => true,
-            'facturas' => $facturas
+            'total_pollo_kg' => array_sum($total_pollo),
+            'total_carne_kg' => array_sum($total_carne),
+            'total_cerdo_kg' => array_sum($total_cerdo),
         ]);
     }
 
