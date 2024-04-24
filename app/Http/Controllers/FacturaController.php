@@ -76,10 +76,24 @@ class FacturaController extends Controller
         ->orderBy('lin_art.lin_des')
         ->get();
 
+        $facturas_embutidos = DB::table('factura')
+        ->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')
+        ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
+        ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
+        ->where('lin_art.lin_des', 'EMBUTIDOS')
+        ->where('reng_fac.uni_venta', 'KG')
+        ->limit(500)
+    //    ->where('factura.fec_emis', '2023-11-02 00:00:00')
+        ->select('reng_fac.fact_num', 'lin_art.lin_des', 'reng_fac.total_art as kg')
+        ->groupBy('lin_art.lin_des', 'reng_fac.fact_num', 'reng_fac.total_art')
+        ->orderBy('lin_art.lin_des')
+        ->get();
+
         $total_pollo = [];
         $total_carne = [];
         $total_cerdo = [];
         $total_lacteos = [];
+        $total_embutidos = [];
 
         foreach($facturas_pollo as $pollo) {
             if($pollo->kg[0] == '.') {
@@ -116,6 +130,15 @@ class FacturaController extends Controller
             }
           
         } 
+
+        foreach($facturas_embutidos as $embutidos) {
+            if($embutidos->kg[0] == '.') {
+                array_push($total_embutidos, '0'.$embutidos->kg);
+            } else {
+                array_push($total_embutidos, $embutidos->kg);
+            }
+          
+        } 
        
        // ->sum('reng_fac.total_art');
        // $cantidad_kg_carne =  DB::select('SELECT * FROM users WHERE id > ?', [$userId]);
@@ -125,6 +148,7 @@ class FacturaController extends Controller
             'total_carne_kg' => array_sum($total_carne),
             'total_cerdo_kg' => array_sum($total_cerdo),
             'total_lacteos_kg' => array_sum($total_lacteos),
+            'total_embutidos_kg' => array_sum($total_embutidos),
         ]);
     }
 
