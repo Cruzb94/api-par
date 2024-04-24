@@ -56,16 +56,30 @@ class FacturaController extends Controller
         ->where('lin_art.lin_des', 'CARNICERIA')
         ->where('sub_lin.subl_des', 'CERDO')
         ->where('reng_fac.uni_venta', 'KG')
-        ->limit(1000)
+        ->limit(500)
     //    ->where('factura.fec_emis', '2023-11-02 00:00:00')
         ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
         ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('sub_lin.subl_des')
         ->get();
         
-      $total_pollo = [];
-      $total_carne = [];
-      $total_cerdo = [];
+        $facturas_lacteos = DB::table('factura')
+        ->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')
+        ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
+        ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
+        ->where('lin_art.lin_des', 'LACTEOS')
+        ->where('reng_fac.uni_venta', 'KG')
+        ->limit(500)
+    //    ->where('factura.fec_emis', '2023-11-02 00:00:00')
+        ->select('reng_fac.fact_num', 'lin_art.lin_des', 'reng_fac.total_art as kg')
+        ->groupBy('lin_art.lin_des', 'reng_fac.fact_num', 'reng_fac.total_art')
+        ->orderBy('lin_art.lin_des')
+        ->get();
+
+        $total_pollo = [];
+        $total_carne = [];
+        $total_cerdo = [];
+        $total_lacteos = [];
 
         foreach($facturas_pollo as $pollo) {
             if($pollo->kg[0] == '.') {
@@ -93,6 +107,15 @@ class FacturaController extends Controller
             }
           
         } 
+
+        foreach($facturas_lacteos as $lacteos) {
+            if($lacteos->kg[0] == '.') {
+                array_push($total_lacteos, '0'.$lacteos->kg);
+            } else {
+                array_push($total_lacteos, $lacteos->kg);
+            }
+          
+        } 
        
        // ->sum('reng_fac.total_art');
        // $cantidad_kg_carne =  DB::select('SELECT * FROM users WHERE id > ?', [$userId]);
@@ -101,6 +124,7 @@ class FacturaController extends Controller
             'total_pollo_kg' => array_sum($total_pollo),
             'total_carne_kg' => array_sum($total_carne),
             'total_cerdo_kg' => array_sum($total_cerdo),
+            'total_lacteos_kg' => array_sum($total_lacteos),
         ]);
     }
 
