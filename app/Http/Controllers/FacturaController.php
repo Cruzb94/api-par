@@ -139,9 +139,7 @@ class FacturaController extends Controller
             }
           
         } 
-       
-       // ->sum('reng_fac.total_art');
-       // $cantidad_kg_carne =  DB::select('SELECT * FROM users WHERE id > ?', [$userId]);
+
         return response()->json([
             'status' => true,
             'total_pollo_kg' => array_sum($total_pollo),
@@ -152,77 +150,21 @@ class FacturaController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $product = Product::create($request->all());
+    public function topBuyClients() {
+        $results = DB::table('factura')
+        ->join('clientes', 'factura.co_cli', '=', 'clientes.co_cli')
+        ->limit(200)
+        ->select(
+        DB::raw('SUM(tot_neto) AS total_neto_compras'),
+        DB::raw('clientes.cli_des AS cliente'))
+        ->groupBy('clientes.cli_des')
+        ->orderBy('total_neto_compras', 'desc')
+        ->get(); 
 
         return response()->json([
             'status' => true,
-            'message' => "Product Created successfully!",
-            'product' => $product
-        ], Response::HTTP_CREATED);
-    }
+            'results' => $results
+        ]);
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Product $product)
-    {
-        if(!empty($product->id)) {
-
-            return response()->json([
-                'status' => true,
-                'product' => $product
-            ], Response::HTTP_OK); 
-           
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => "product does not exist."
-            ], Response::HTTP_OK);    
-        }
-
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Product $product)
-    {
-        $product->update($request->only("name"));
-
-        return response()->json([
-            'status' => true,
-            'message' => "product updated successfully"
-        ], Response::HTTP_OK); 
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Product $product)
-    {
-        Product::findOrFail($product->id)->delete();
-        
-        return response()->json([
-            'status' => true,
-            'message' => "product deleted successfully"
-        ], Response::HTTP_OK); 
     }
 }
