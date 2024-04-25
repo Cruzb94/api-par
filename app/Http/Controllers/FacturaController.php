@@ -165,6 +165,25 @@ class FacturaController extends Controller
             'status' => true,
             'results' => $results
         ]);
+    }
+
+    public function topBuyArticles() {
+        $results = DB::table('factura')
+        ->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')
+        ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
+        ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
+        ->limit(200)
+        ->select(
+        DB::raw('sum(reng_fac.total_art) as total_vendidos'),
+        DB::raw('art.art_des'))
+        ->groupBy('art.art_des')
+        ->orderBy('total_vendidos', 'desc')
+        ->get(); 
+
+        return response()->json([
+            'status' => true,
+            'results' => $results
+        ]);
 
     }
 }
