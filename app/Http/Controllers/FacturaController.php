@@ -7,6 +7,7 @@ use App\Models\Factura;
 use App\Models\RengFact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class FacturaController extends Controller
 {
@@ -185,5 +186,64 @@ class FacturaController extends Controller
             'results' => $results
         ]);
 
+    }
+
+    public function forWeek($date_from = '2023-08-02', $date_to = "2023-08-16") {
+        
+        $currentDate = Carbon::createFromFormat('Y-m-d', $date_from);
+        $shippingDate = Carbon::createFromFormat('Y-m-d', $date_to);
+
+        $diferencia_en_dias = $shippingDate->diffInDays($currentDate);
+        $result = [];
+
+        $porciones = explode("-", $date_from);
+        $dia_mes = $porciones[2];
+
+        $porciones_date_from = explode(" ", $date_from); 
+
+        $fecha = $porciones_date_from[0] . 'T00:00:00';
+       //echo $fecha; die();
+        
+        $sub_query = DB::table('factura ')
+        ->where('factura.fec_emis',  $fecha)    
+        ->select(
+            DB::raw('factura.fact_num'), 
+            DB::raw('count(fact_num) as total'), 
+            DB::raw('DATEPART(HOUR, factura.fe_us_in) AS hora'))
+        ->groupby('factura.fe_us_in', 'factura.fact_num');
+
+        $main_query = DB::table($sub_query,'sub')->selectRaw("sub.hora, sum(sub.total) as total_facturas") 
+        ->groupby('hora')
+        ->orderBy('hora', 'asc')
+        ->get(); 
+
+        array_push($result, $main_query);
+
+    
+        for ($i=1; $i <= $diferencia_en_dias; $i++) { 
+
+          $porciones_date_next = explode(" ", $currentDate->addDays(1)); 
+        
+           $sub_query = DB::table('factura ')
+            ->where('factura.fec_emis', $porciones_date_next[0].'T00:00:00')    
+            ->select(
+                DB::raw('factura.fact_num'), 
+                DB::raw('count(fact_num) as total'), 
+                DB::raw('DATEPART(HOUR, factura.fe_us_in) AS hora'))
+            ->groupby('factura.fe_us_in', 'factura.fact_num');
+
+            $main_query = DB::table($sub_query,'sub')->selectRaw("sub.hora, sum(sub.total) as total_facturas") 
+            ->groupby('hora')
+            ->orderBy('hora', 'asc')
+            ->get(); 
+
+            array_push($result, $main_query);  
+    
+         } 
+        
+        return response()->json([
+            'status' => true,
+            'results' => $result
+        ]); 
     }
 }

@@ -28,5 +28,6 @@ Route::middleware('auth:api')->group( function () {
     Route::apiResource('facturas', FacturaController::class);
     Route::get('/topBuyClients', 'App\Http\Controllers\FacturaController@topBuyClients');
     Route::get('/topBuyArticles', 'App\Http\Controllers\FacturaController@topBuyArticles');
+    Route::get('/forWeek', 'App\Http\Controllers\FacturaController@forWeek');
 
 });
