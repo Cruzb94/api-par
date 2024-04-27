@@ -315,5 +315,29 @@ class FacturaController extends Controller
             'results' => $result
         ]); 
     }
+
+    public function percentageInvoice() {
+        $date = $_GET['date'];
+
+        $results_factura = DB::table('factura')
+        ->where('factura.fec_emis',  $date)    
+        ->where('factura.impfis', '<>',  '')    
+        ->select(
+            DB::raw('*'))
+        ->get(); 
+
+        $results_notas = DB::table('factura')
+        ->where('factura.fec_emis',  $date)    
+        ->where('factura.impfis', '=',  '')    
+        ->select(
+            DB::raw('*'))
+        ->get(); 
+
+        return response()->json([
+            'status' => true,
+            'facturas' => count($results_factura),
+            'notas_entrega' => count($results_notas)
+        ]);
+    }
     
 }

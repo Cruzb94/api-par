@@ -30,5 +30,6 @@ Route::middleware('auth:api')->group( function () {
     Route::get('/topBuyArticles', 'App\Http\Controllers\FacturaController@topBuyArticles');
     Route::get('/forWeek', 'App\Http\Controllers\FacturaController@forWeek');
     Route::get('/forBox', 'App\Http\Controllers\FacturaController@forBox');
+    Route::get('/percentageInvoice', 'App\Http\Controllers\FacturaController@percentageInvoice');
 
 });
