@@ -189,7 +189,7 @@ class FacturaController extends Controller
     }
 
     public function forWeek() {
-        
+        //$date_from = '2023-08-02', $date_to = "2023-08-16"
         $date_from = $_GET['date_from'];
         $date_to = $_GET['date_to'];
         $currentDate = Carbon::createFromFormat('Y-m-d', $date_from);
@@ -248,4 +248,72 @@ class FacturaController extends Controller
             'results' => $result
         ]); 
     }
+
+    public function forBox() {
+        //$date_from = '2023-08-02', $date_to = "2023-08-16"
+        $date_from = $_GET['date_from'];
+        $date_to = $_GET['date_to'];
+        $currentDate = Carbon::createFromFormat('Y-m-d', $date_from);
+        $shippingDate = Carbon::createFromFormat('Y-m-d', $date_to);
+
+        $diferencia_en_dias = $shippingDate->diffInDays($currentDate);
+        $result = [];
+
+        $porciones = explode("-", $date_from);
+        $dia_mes = $porciones[2];
+
+        $porciones_date_from = explode(" ", $date_from); 
+
+        $fecha = $porciones_date_from[0] . 'T00:00:00';
+       //echo $fecha; die();
+        
+        $sub_query = DB::table('factura')
+        ->join('vendedor', 'factura.co_ven', '=', 'vendedor.co_ven')
+        ->where('factura.fec_emis',  $fecha)    
+        ->where('vendedor.tipo',  'C')    
+        ->select(
+            DB::raw('factura.fact_num'), 
+            DB::raw('count(fact_num) as total'), 
+            DB::raw('DATEPART(HOUR, factura.fe_us_in) AS hora'),
+            DB::raw('vendedor.co_ven as caja')
+            )
+        ->groupby('factura.fe_us_in', 'factura.fact_num', 'vendedor.co_ven');
+
+        $main_query = DB::table($sub_query,'sub')->selectRaw("sub.hora, sum(sub.total) as total_facturas, sub.caja") 
+        ->groupby('hora', 'caja')
+        ->orderBy('caja', 'asc')
+        ->get(); 
+
+        array_push($result, $main_query);
+     
+        for ($i=1; $i <= $diferencia_en_dias; $i++) { 
+
+          $porciones_date_next = explode(" ", $currentDate->addDays(1)); 
+          $fecha_next = $porciones_date_next[0] . 'T00:00:00';
+          $sub_query = DB::table('factura')
+          ->join('vendedor', 'factura.co_ven', '=', 'vendedor.co_ven')
+          ->where('factura.fec_emis',  $fecha_next)    
+          ->where('vendedor.tipo',  'C')    
+          ->select(
+              DB::raw('factura.fact_num'), 
+              DB::raw('count(fact_num) as total'), 
+              DB::raw('DATEPART(HOUR, factura.fe_us_in) AS hora'),
+              DB::raw('vendedor.co_ven as caja')
+              )
+          ->groupby('factura.fe_us_in', 'factura.fact_num', 'vendedor.co_ven');
+  
+          $main_query = DB::table($sub_query,'sub')->selectRaw("sub.hora, sum(sub.total) as total_facturas, sub.caja") 
+          ->groupby('hora', 'caja')
+          ->orderBy('caja', 'asc')
+          ->get(); 
+            array_push($result, $main_query);  
+    
+         } 
+        
+        return response()->json([
+            'status' => true,
+            'results' => $result
+        ]); 
+    }
+    
 }
