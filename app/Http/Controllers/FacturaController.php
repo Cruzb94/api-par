@@ -188,8 +188,10 @@ class FacturaController extends Controller
 
     }
 
-    public function forWeek($date_from = '2023-08-02', $date_to = "2023-08-16") {
+    public function forWeek() {
         
+        $date_from = $_GET['date_from'];
+        $date_to = $_GET['date_to'];
         $currentDate = Carbon::createFromFormat('Y-m-d', $date_from);
         $shippingDate = Carbon::createFromFormat('Y-m-d', $date_to);
 
