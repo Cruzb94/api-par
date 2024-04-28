@@ -18,6 +18,7 @@ class FacturaController extends Controller
      */
     public function index()
     {
+        $date_from = $_GET['date'];
         $facturas_pollo = DB::table('factura')
         ->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')
         ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
@@ -26,8 +27,8 @@ class FacturaController extends Controller
         ->where('lin_art.lin_des', 'CARNICERIA')
         ->where('sub_lin.subl_des', 'POLLO')
         ->where('reng_fac.uni_venta', 'KG')
-        ->limit(100)
-   //     ->where('factura.fec_emis', '2023-11-02 00:00:00')
+       // ->limit(100)
+        ->where('factura.fec_emis', $date_from)
         ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
         ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('sub_lin.subl_des')
@@ -41,8 +42,8 @@ class FacturaController extends Controller
         ->where('lin_art.lin_des', 'CARNICERIA')
         ->where('sub_lin.subl_des', 'CARNES')
         ->where('reng_fac.uni_venta', 'KG')
-        ->limit(500)
-    //    ->where('factura.fec_emis', '2023-11-02 00:00:00')
+      //  ->limit(500)
+        ->where('factura.fec_emis', $date_from)
         ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
         ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('sub_lin.subl_des')
@@ -57,8 +58,8 @@ class FacturaController extends Controller
         ->where('lin_art.lin_des', 'CARNICERIA')
         ->where('sub_lin.subl_des', 'CERDO')
         ->where('reng_fac.uni_venta', 'KG')
-        ->limit(500)
-    //    ->where('factura.fec_emis', '2023-11-02 00:00:00')
+     //   ->limit(500)
+        ->where('factura.fec_emis', $date_from)
         ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
         ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('sub_lin.subl_des')
@@ -70,8 +71,8 @@ class FacturaController extends Controller
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
         ->where('lin_art.lin_des', 'LACTEOS')
         ->where('reng_fac.uni_venta', 'KG')
-        ->limit(500)
-    //    ->where('factura.fec_emis', '2023-11-02 00:00:00')
+        //->limit(500)
+        ->where('factura.fec_emis', $date_from)
         ->select('reng_fac.fact_num', 'lin_art.lin_des', 'reng_fac.total_art as kg')
         ->groupBy('lin_art.lin_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('lin_art.lin_des')
@@ -83,8 +84,8 @@ class FacturaController extends Controller
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
         ->where('lin_art.lin_des', 'EMBUTIDOS')
         ->where('reng_fac.uni_venta', 'KG')
-        ->limit(500)
-    //    ->where('factura.fec_emis', '2023-11-02 00:00:00')
+      //  ->limit(500)
+        ->where('factura.fec_emis', $date_from)
         ->select('reng_fac.fact_num', 'lin_art.lin_des', 'reng_fac.total_art as kg')
         ->groupBy('lin_art.lin_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('lin_art.lin_des')
@@ -152,8 +153,12 @@ class FacturaController extends Controller
     }
 
     public function topBuyClients() {
+
+        $date_from = $_GET['date'];
+
         $results = DB::table('factura')
         ->join('clientes', 'factura.co_cli', '=', 'clientes.co_cli')
+        ->where('factura.fec_emis',  $date_from)    
         ->limit(200)
         ->select(
         DB::raw('SUM(tot_neto) AS total_neto_compras'),
@@ -169,10 +174,13 @@ class FacturaController extends Controller
     }
 
     public function topBuyArticles() {
+
+        $date_from = $_GET['date'];
         $results = DB::table('factura')
         ->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')
         ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
+        ->where('factura.fec_emis',  $date_from)    
         ->limit(200)
         ->select(
         DB::raw('sum(reng_fac.total_art) as total_vendidos'),
