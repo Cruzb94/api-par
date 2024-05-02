@@ -27,8 +27,9 @@ class FacturaController extends Controller
         ->where('lin_art.lin_des', 'CARNICERIA')
         ->where('sub_lin.subl_des', 'POLLO')
         ->where('reng_fac.uni_venta', 'KG')
-       // ->limit(100)
         ->where('factura.fec_emis', $date_from)
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1) 
         ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
         ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('sub_lin.subl_des')
@@ -42,8 +43,9 @@ class FacturaController extends Controller
         ->where('lin_art.lin_des', 'CARNICERIA')
         ->where('sub_lin.subl_des', 'CARNES')
         ->where('reng_fac.uni_venta', 'KG')
-      //  ->limit(500)
         ->where('factura.fec_emis', $date_from)
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1) 
         ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
         ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('sub_lin.subl_des')
@@ -58,8 +60,9 @@ class FacturaController extends Controller
         ->where('lin_art.lin_des', 'CARNICERIA')
         ->where('sub_lin.subl_des', 'CERDO')
         ->where('reng_fac.uni_venta', 'KG')
-     //   ->limit(500)
         ->where('factura.fec_emis', $date_from)
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1) 
         ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
         ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('sub_lin.subl_des')
@@ -71,8 +74,9 @@ class FacturaController extends Controller
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
         ->where('lin_art.lin_des', 'LACTEOS')
         ->where('reng_fac.uni_venta', 'KG')
-        //->limit(500)
         ->where('factura.fec_emis', $date_from)
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1) 
         ->select('reng_fac.fact_num', 'lin_art.lin_des', 'reng_fac.total_art as kg')
         ->groupBy('lin_art.lin_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('lin_art.lin_des')
@@ -84,8 +88,9 @@ class FacturaController extends Controller
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
         ->where('lin_art.lin_des', 'EMBUTIDOS')
         ->where('reng_fac.uni_venta', 'KG')
-      //  ->limit(500)
         ->where('factura.fec_emis', $date_from)
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1) 
         ->select('reng_fac.fact_num', 'lin_art.lin_des', 'reng_fac.total_art as kg')
         ->groupBy('lin_art.lin_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('lin_art.lin_des')
@@ -159,6 +164,8 @@ class FacturaController extends Controller
         $results = DB::table('factura')
         ->join('clientes', 'factura.co_cli', '=', 'clientes.co_cli')
         ->where('factura.fec_emis',  $date_from)    
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1) 
         ->limit(200)
         ->select(
         DB::raw('SUM(tot_neto) AS total_neto_compras'),
@@ -181,6 +188,8 @@ class FacturaController extends Controller
         ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
         ->where('factura.fec_emis',  $date_from)    
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1) 
         ->limit(200)
         ->select(
         DB::raw('sum(reng_fac.total_art) as total_vendidos'),
@@ -210,12 +219,16 @@ class FacturaController extends Controller
         $dia_mes = $porciones[2];
 
         $porciones_date_from = explode(" ", $date_from); 
+        $porciones_date_to = explode(" ", $date_to); 
 
         $fecha = $porciones_date_from[0] . 'T00:00:00';
-       //echo $fecha; die();
+        $fecha_hasta = $porciones_date_to[0] . 'T00:00:00';
+      // echo $fecha; die();
         
-        $sub_query = DB::table('factura ')
-        ->where('factura.fec_emis',  $fecha)    
+        $sub_query = DB::table('factura')
+        ->where('factura.fec_emis', '>=', $fecha)    
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1)  
         ->select(
             DB::raw('factura.fact_num'), 
             DB::raw('count(fact_num) as total'), 
@@ -234,8 +247,10 @@ class FacturaController extends Controller
 
           $porciones_date_next = explode(" ", $currentDate->addDays(1)); 
         
-           $sub_query = DB::table('factura ')
+           $sub_query = DB::table('factura')
             ->where('factura.fec_emis', $porciones_date_next[0].'T00:00:00')    
+            ->where('factura.anulada', 0)  
+            ->where('factura.impresa', 1)  
             ->select(
                 DB::raw('factura.fact_num'), 
                 DB::raw('count(fact_num) as total'), 
@@ -246,7 +261,7 @@ class FacturaController extends Controller
             ->groupby('hora')
             ->orderBy('hora', 'asc')
             ->get(); 
-
+                
             array_push($result, $main_query);  
     
          } 
@@ -261,6 +276,7 @@ class FacturaController extends Controller
         //$date_from = '2023-08-02', $date_to = "2023-08-16"
         $date_from = $_GET['date_from'];
         $date_to = $_GET['date_to'];
+        $caja = $_GET['caja'];
         $currentDate = Carbon::createFromFormat('Y-m-d', $date_from);
         $shippingDate = Carbon::createFromFormat('Y-m-d', $date_to);
 
@@ -275,10 +291,14 @@ class FacturaController extends Controller
         $fecha = $porciones_date_from[0] . 'T00:00:00';
        //echo $fecha; die();
         
+       if($caja !== '') {
         $sub_query = DB::table('factura')
         ->join('vendedor', 'factura.co_ven', '=', 'vendedor.co_ven')
-        ->where('factura.fec_emis',  $fecha)    
+        ->where('factura.fec_emis', $fecha)    
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1)  
         ->where('vendedor.tipo',  'C')    
+        ->where('vendedor.co_ven',  $caja)   
         ->select(
             DB::raw('factura.fact_num'), 
             DB::raw('count(fact_num) as total'), 
@@ -291,30 +311,80 @@ class FacturaController extends Controller
         ->groupby('hora', 'caja')
         ->orderBy('caja', 'asc')
         ->get(); 
+    } else {
+        $sub_query = DB::table('factura')
+        ->join('vendedor', 'factura.co_ven', '=', 'vendedor.co_ven')
+        ->where('factura.fec_emis', $fecha)    
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1)  
+        ->where('vendedor.tipo',  'C')     
+        ->select(
+            DB::raw('factura.fact_num'), 
+            DB::raw('count(fact_num) as total'), 
+            DB::raw('DATEPART(HOUR, factura.fe_us_in) AS hora'),
+            DB::raw('vendedor.co_ven as caja')
+            )
+        ->groupby('factura.fe_us_in', 'factura.fact_num', 'vendedor.co_ven');
+
+        $main_query = DB::table($sub_query,'sub')->selectRaw("sub.hora, sum(sub.total) as total_facturas, sub.caja") 
+        ->groupby('hora', 'caja')
+        ->orderBy('caja', 'asc')
+        ->get(); 
+    }
+        
 
         array_push($result, $main_query);
+        
      
         for ($i=1; $i <= $diferencia_en_dias; $i++) { 
 
           $porciones_date_next = explode(" ", $currentDate->addDays(1)); 
           $fecha_next = $porciones_date_next[0] . 'T00:00:00';
-          $sub_query = DB::table('factura')
-          ->join('vendedor', 'factura.co_ven', '=', 'vendedor.co_ven')
-          ->where('factura.fec_emis',  $fecha_next)    
-          ->where('vendedor.tipo',  'C')    
-          ->select(
-              DB::raw('factura.fact_num'), 
-              DB::raw('count(fact_num) as total'), 
-              DB::raw('DATEPART(HOUR, factura.fe_us_in) AS hora'),
-              DB::raw('vendedor.co_ven as caja')
-              )
-          ->groupby('factura.fe_us_in', 'factura.fact_num', 'vendedor.co_ven');
-  
-          $main_query = DB::table($sub_query,'sub')->selectRaw("sub.hora, sum(sub.total) as total_facturas, sub.caja") 
-          ->groupby('hora', 'caja')
-          ->orderBy('caja', 'asc')
-          ->get(); 
-            array_push($result, $main_query);  
+
+          if($caja !== '') {
+            $sub_query = DB::table('factura')
+            ->join('vendedor', 'factura.co_ven', '=', 'vendedor.co_ven')
+            ->where('factura.fec_emis',  $fecha_next)    
+            ->where('factura.anulada', 0)  
+            ->where('factura.impresa', 1)  
+            ->where('vendedor.tipo',  'C')    
+            ->where('vendedor.co_ven',  $caja)   
+            ->select(
+                DB::raw('factura.fact_num'), 
+                DB::raw('count(fact_num) as total'), 
+                DB::raw('DATEPART(HOUR, factura.fe_us_in) AS hora'),
+                DB::raw('vendedor.co_ven as caja')
+                )
+            ->groupby('factura.fe_us_in', 'factura.fact_num', 'vendedor.co_ven');
+    
+            $main_query = DB::table($sub_query,'sub')->selectRaw("sub.hora, sum(sub.total) as total_facturas, sub.caja") 
+            ->groupby('hora', 'caja')
+            ->orderBy('caja', 'asc')
+            ->get(); 
+              array_push($result, $main_query);  
+          } else {
+            $sub_query = DB::table('factura')
+            ->join('vendedor', 'factura.co_ven', '=', 'vendedor.co_ven')
+            ->where('factura.fec_emis',  $fecha_next)    
+            ->where('factura.anulada', 0)  
+            ->where('factura.impresa', 1)  
+            ->where('vendedor.tipo',  'C')    
+            ->select(
+                DB::raw('factura.fact_num'), 
+                DB::raw('count(fact_num) as total'), 
+                DB::raw('DATEPART(HOUR, factura.fe_us_in) AS hora'),
+                DB::raw('vendedor.co_ven as caja')
+                )
+            ->groupby('factura.fe_us_in', 'factura.fact_num', 'vendedor.co_ven');
+    
+            $main_query = DB::table($sub_query,'sub')->selectRaw("sub.hora, sum(sub.total) as total_facturas, sub.caja") 
+            ->groupby('hora', 'caja')
+            ->orderBy('caja', 'asc')
+            ->get(); 
+              array_push($result, $main_query);  
+          }
+
+         
     
          } 
         
@@ -325,10 +395,12 @@ class FacturaController extends Controller
     }
 
     public function percentageInvoice() {
-        $date = $_GET['date'];
+        $date = $_GET['date'] . 'T00:00:00';
 
         $results_factura = DB::table('factura')
         ->where('factura.fec_emis',  $date)    
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1) 
         ->where('factura.impfis', '<>',  '')    
         ->select(
             DB::raw('*'))
@@ -336,6 +408,8 @@ class FacturaController extends Controller
 
         $results_notas = DB::table('factura')
         ->where('factura.fec_emis',  $date)    
+        ->where('factura.anulada', 0)  
+        ->where('factura.impresa', 1) 
         ->where('factura.impfis', '=',  '')    
         ->select(
             DB::raw('*'))

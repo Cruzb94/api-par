@@ -22,6 +22,7 @@ use App\Http\Controllers\FacturaController;
 
 Route::prefix('/user')->group(function() {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
+    Route::post('/register', 'App\Http\Controllers\LoginController@register');
 });
 
 Route::middleware('auth:api')->group( function () {
