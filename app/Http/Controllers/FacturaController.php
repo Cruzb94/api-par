@@ -226,7 +226,7 @@ class FacturaController extends Controller
       // echo $fecha; die();
         
         $sub_query = DB::table('factura')
-        ->where('factura.fec_emis', '>=', $fecha)    
+        ->where('factura.fec_emis', $fecha)    
         ->where('factura.anulada', 0)  
         ->where('factura.impresa', 1)  
         ->select(

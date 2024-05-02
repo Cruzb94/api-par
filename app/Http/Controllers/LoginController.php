@@ -54,6 +54,7 @@ class LoginController extends Controller
         ]);
 
         return response()->json([
+            'status'  => 'success',
             'message' => 'Successfully created user!'
         ], 201);
     }
