@@ -24,10 +24,10 @@ class FacturaController extends Controller
         ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
         ->join('sub_lin', 'lin_art.co_lin', '=', 'sub_lin.co_lin')
-        ->where('lin_art.lin_des', 'CARNICERIA')
+        //->where('lin_art.lin_des', 'CARNICERIA')
         ->where('sub_lin.subl_des', 'POLLO')
         ->where('reng_fac.uni_venta', 'KG')
-        ->where('factura.fec_emis', $date_from)
+        ->where('factura.fec_emis', $date_from. 'T00:00:00')
         ->where('factura.anulada', 0)  
         ->where('factura.impresa', 1) 
         ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
@@ -40,10 +40,10 @@ class FacturaController extends Controller
         ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
         ->join('sub_lin', 'lin_art.co_lin', '=', 'sub_lin.co_lin')
-        ->where('lin_art.lin_des', 'CARNICERIA')
+      //  ->where('lin_art.lin_des', 'CARNICERIA')
         ->where('sub_lin.subl_des', 'CARNES')
         ->where('reng_fac.uni_venta', 'KG')
-        ->where('factura.fec_emis', $date_from)
+        ->where('factura.fec_emis', $date_from. 'T00:00:00')
         ->where('factura.anulada', 0)  
         ->where('factura.impresa', 1) 
         ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
@@ -57,24 +57,24 @@ class FacturaController extends Controller
         ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
         ->join('sub_lin', 'lin_art.co_lin', '=', 'sub_lin.co_lin')
-        ->where('lin_art.lin_des', 'CARNICERIA')
+       // ->where('lin_art.lin_des', 'CARNICERIA')
         ->where('sub_lin.subl_des', 'CERDO')
         ->where('reng_fac.uni_venta', 'KG')
-        ->where('factura.fec_emis', $date_from)
+        ->where('factura.fec_emis', $date_from. 'T00:00:00')
         ->where('factura.anulada', 0)  
         ->where('factura.impresa', 1) 
         ->select('reng_fac.fact_num', 'sub_lin.subl_des', 'reng_fac.total_art as kg')
         ->groupBy('sub_lin.subl_des', 'reng_fac.fact_num', 'reng_fac.total_art')
         ->orderBy('sub_lin.subl_des')
         ->get();
-        
+
         $facturas_lacteos = DB::table('factura')
         ->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')
         ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
         ->where('lin_art.lin_des', 'LACTEOS')
         ->where('reng_fac.uni_venta', 'KG')
-        ->where('factura.fec_emis', $date_from)
+        ->where('factura.fec_emis', $date_from. 'T00:00:00')
         ->where('factura.anulada', 0)  
         ->where('factura.impresa', 1) 
         ->select('reng_fac.fact_num', 'lin_art.lin_des', 'reng_fac.total_art as kg')
@@ -88,7 +88,7 @@ class FacturaController extends Controller
         ->join('lin_art', 'art.co_lin', '=', 'lin_art.co_lin')
         ->where('lin_art.lin_des', 'EMBUTIDOS')
         ->where('reng_fac.uni_venta', 'KG')
-        ->where('factura.fec_emis', $date_from)
+        ->where('factura.fec_emis', $date_from. 'T00:00:00')
         ->where('factura.anulada', 0)  
         ->where('factura.impresa', 1) 
         ->select('reng_fac.fact_num', 'lin_art.lin_des', 'reng_fac.total_art as kg')
@@ -159,7 +159,7 @@ class FacturaController extends Controller
 
     public function topBuyClients() {
 
-        $date_from = $_GET['date'];
+        $date_from = $_GET['date'] . 'T00:00:00';
 
         $results = DB::table('factura')
         ->join('clientes', 'factura.co_cli', '=', 'clientes.co_cli')
@@ -182,7 +182,7 @@ class FacturaController extends Controller
 
     public function topBuyArticles() {
 
-        $date_from = $_GET['date'];
+        $date_from = $_GET['date'] . 'T00:00:00';
         $results = DB::table('factura')
         ->join('reng_fac', 'factura.fact_num', '=', 'reng_fac.fact_num')
         ->join('art', 'art.co_art', '=', 'reng_fac.co_art')
@@ -297,7 +297,7 @@ class FacturaController extends Controller
         ->where('factura.fec_emis', $fecha)    
         ->where('factura.anulada', 0)  
         ->where('factura.impresa', 1)  
-        ->where('vendedor.tipo',  'C')    
+    //    ->where('vendedor.tipo',  'C')    
         ->where('vendedor.co_ven',  $caja)   
         ->select(
             DB::raw('factura.fact_num'), 
@@ -317,7 +317,7 @@ class FacturaController extends Controller
         ->where('factura.fec_emis', $fecha)    
         ->where('factura.anulada', 0)  
         ->where('factura.impresa', 1)  
-        ->where('vendedor.tipo',  'C')     
+        //->where('vendedor.tipo',  'C')     
         ->select(
             DB::raw('factura.fact_num'), 
             DB::raw('count(fact_num) as total'), 

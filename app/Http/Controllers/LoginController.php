@@ -33,6 +33,7 @@ class LoginController extends Controller
         $token->save();
 
         return response()->json([
+            'user'  =>  $user,
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
             'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString()
@@ -47,12 +48,20 @@ class LoginController extends Controller
             'password' => 'required|string'
         ]);
 
-        User::create([
+
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password)
         ]);
 
+        if(!$user) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Error al crear el usuario'
+            ], 201);
+        }
+ 
         return response()->json([
             'status'  => 'success',
             'message' => 'Successfully created user!'
