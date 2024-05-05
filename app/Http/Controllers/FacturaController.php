@@ -347,7 +347,7 @@ class FacturaController extends Controller
             ->where('factura.fec_emis',  $fecha_next)    
             ->where('factura.anulada', 0)  
             ->where('factura.impresa', 1)  
-            ->where('vendedor.tipo',  'C')    
+           // ->where('vendedor.tipo',  'C')    
             ->where('vendedor.co_ven',  $caja)   
             ->select(
                 DB::raw('factura.fact_num'), 
@@ -368,7 +368,7 @@ class FacturaController extends Controller
             ->where('factura.fec_emis',  $fecha_next)    
             ->where('factura.anulada', 0)  
             ->where('factura.impresa', 1)  
-            ->where('vendedor.tipo',  'C')    
+          //  ->where('vendedor.tipo',  'C')    
             ->select(
                 DB::raw('factura.fact_num'), 
                 DB::raw('count(fact_num) as total'), 
